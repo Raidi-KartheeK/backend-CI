@@ -75,7 +75,6 @@ post {
     failure{
         echo 'This section runs when pipline failure'
     }
+    
     }
 }
-
-
