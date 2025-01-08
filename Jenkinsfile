@@ -30,11 +30,9 @@ pipeline {
             steps {
                 withAWS(region: 'us-east-1', credentials: 'aws-creds') {
                     sh """
-                    
                     docker build -t raidi/backend:${appVersion} .
                     docker images
-                
-                       """
+                    """
                 }
             }
         }
