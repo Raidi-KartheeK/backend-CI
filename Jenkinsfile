@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'AGENT-1'
+        label 'Agent-1'
     }
     options{
         timeout(time: 10,unit: 'MINUTES')
@@ -9,6 +9,11 @@ pipeline {
     }
      environment {
         DEBUG = 'true'
+        appVersion= "" // you can use the image across the pipeline
+        region = "us-east-1"
+        aws_account =  ""
+        project= "expense-dev"
+        environment = "dev"
     }
     stages {
         stage('Read the version') {
@@ -28,22 +33,27 @@ pipeline {
            stage('Docker build') {
             
             steps {
-                withAWS(region: 'us-east-1', credentials: 'aws-creds') {
-                    sh """
-                    docker build -t raidi/backend:${appVersion} .
-                    docker images
-                    """
-                }
+                // withAWS(region: 'us-east-1', credentials: 'aws-creds') {
+                //     sh """
+                //     docker build -t raidi/backend:${appVersion} .
+                //     docker images
+                //     """[]
+                // ecr-image $region | docker login --username AWS --password-stdin $
+                // (aws_account_id).dkr.ecr.us-east-1.amazonaws.com
+                // }
+                //  use  the ecr image, build,push
             }
         }
         stage('Deploy') {
-            when {
-                expression { env.GIT_BRANCH != "origin/main" }
-            }
             steps {
-
-                    sh 'echo This is deploy'
-                    //error 'pipeline failed'
+                withAWS(region: 'us-east-1', credentials: "aws-credentials")
+                    sh """
+                        aws eks update -kubecofig --region ${ region }--name ${ project} --${environment}
+                        cd helm
+                        sed -i 's/IMAGE_VERSION/${appVersion}/g' values-${environment}.yaml
+                        helm upgrade --install ${component} -n ${project} -f values -${environment}.yaml .
+                    """
+            }
 
             }
         }

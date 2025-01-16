@@ -1,0 +1,7 @@
+configMap: 
+  DB_HOST: # rds image
+deployment:
+    imageURL: # ecr image url
+  imageVersion: IMAGE_VERSION
+hpa:
+  cpuUtilzation: 20
