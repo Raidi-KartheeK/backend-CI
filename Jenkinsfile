@@ -8,5 +8,5 @@ if( ! env.BRANCH_NAME.equalIgnoreCase('main')){ // true, if branch is feature br
     nodeJSEKSPipeline(configMap)
 }
 else{
-    echo "Follow the process to PROD"
+    echo "Follow the process to PROD  release"
 }
