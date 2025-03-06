@@ -47,7 +47,7 @@ pipeline {
                 }
             }
 
-            stage('Quality Gate') {
+            stage('SQuality Gate') {
                 steps {
                     timeout(time: 5, unit: 'MINUTES') {
                         waitForQualityGate abortPipeline: true
@@ -57,7 +57,7 @@ pipeline {
             stage('Docker build') {
                 
                 steps {
-                    withAWS(region: 'us-east-1', credentials: "aws-creds-${environment}") {
+                    withAWS(region: 'us-east-1', credentials: "aws-credentials-${environment}") {
                         sh """
                         aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.us-east-1.amazonaws.com
 
@@ -71,15 +71,16 @@ pipeline {
                 }
             }
             stage('Deploy'){
-                when{
-                    expression {params.deploy}
-                }
-
                 steps{
-                    build job: "../${component}-cd", parameters: [
-                        string(name: 'version', value: "$appVersion"),
-                        string(name: 'ENVIRONMENT', value: "dev"),
-                    ], wait: true
+                    withAWS(region: 'us-east-1', credentials: 'aws_credentials') {
+                    sh """ 
+                        aws eks update-kubeconfig --region ${region} --name ${project}-${environment}
+                        cd helm 
+                        sed -i 's/IMAGE_VERSION/${appVersion}/g' values-${environment}.yaml
+                        helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
+                    """
+                        }
+                    }
                 }
             }
         }
