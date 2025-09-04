@@ -1,5 +1,5 @@
 configMap: 
-  DB_HOST: # rds image
+  DB_HOST: # rds endpoint
 deployment:
   imageURL: # ecr image url
   imageVersion: IMAGE_VERSION
